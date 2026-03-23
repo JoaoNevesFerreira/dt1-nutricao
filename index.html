@@ -1951,7 +1951,7 @@ function SearchTab({foods,onSelect,t}){
 
 function FoodModal({food,onClose,onAdd,t}){
   const lang=useLang();
-  const [qty,setQty]=useState(100);
+  const [qty,setQty]=useState(0);
   const hc=pct(food,qty,'hc'),cal=pct(food,qty,'cal'),fat=pct(food,qty,'fat'),pro=pct(food,qty,'pro'),fib=pct(food,qty,'fib');
   const fpu=calcFPU(fat,pro);
   const gi=giLabel(food.gi,t);
@@ -1986,20 +1986,24 @@ function FoodModal({food,onClose,onAdd,t}){
         </div>
         <div style={{marginBottom:16}}>
           <div style={{fontSize:13,fontWeight:600,marginBottom:10,color:T.slate}}>{t.quantity} ({food.u})</div>
-          <div style={{display:'flex',alignItems:'center',gap:10}}>
-            <button onClick={()=>setQty(q=>Math.max(5,q-5))} style={{width:48,height:48,borderRadius:24,border:`1.5px solid ${T.teal}66`,background:'rgba(0,180,216,0.08)',fontSize:24,cursor:'pointer',color:T.teal,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700}}>−</button>
-            <input type="number" value={qty} min={1} onChange={e=>setQty(Math.max(1,parseInt(e.target.value)||0))} style={{flex:1,textAlign:'center',fontSize:30,fontWeight:900,border:`1.5px solid ${T.teal}55`,borderRadius:14,padding:'10px 0',color:T.white,background:'rgba(0,180,216,0.06)',fontFamily:'Outfit'}}/>
-            <button onClick={()=>setQty(q=>q+5)} style={{width:48,height:48,borderRadius:24,border:`1.5px solid ${T.teal}66`,background:'rgba(0,180,216,0.08)',fontSize:24,cursor:'pointer',color:T.teal,display:'flex',alignItems:'center',justifyContent:'center',fontWeight:700}}>+</button>
-          </div>
-          <input type="range" min={5} max={500} value={qty} onChange={e=>setQty(parseInt(e.target.value))} style={{width:'100%',marginTop:14,accentColor:T.teal}}/>
-          <div style={{display:'flex',gap:4,marginTop:10}}>
-            {[25,50,100,150,200].map(v=>(<button key={v} onClick={()=>setQty(v)} style={{flex:1,padding:'7px 2px',background:qty===v?`${T.teal}33`:'rgba(255,255,255,0.06)',color:qty===v?T.tealL:T.slate,border:`1px solid ${qty===v?T.teal+'55':'rgba(255,255,255,0.08)'}`,borderRadius:9,fontSize:12,fontWeight:700,cursor:'pointer',fontFamily:'Outfit'}}>{v}{food.u}</button>))}
-          </div>
+          <input
+            type="number"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            value={qty||''}
+            min={1}
+            placeholder="100"
+            onChange={e=>{const v=parseInt(e.target.value);if(!isNaN(v)&&v>0)setQty(v);else if(e.target.value==='')setQty(0);}}
+            onFocus={e=>{e.target.select();e.target.style.borderColor=T.teal;}}
+            onBlur={e=>{e.target.style.borderColor=`${T.teal}55`;}}
+            style={{width:'100%',textAlign:'center',fontSize:52,fontWeight:900,border:`2px solid ${T.teal}55`,borderRadius:18,padding:'18px 0',color:T.white,background:'rgba(0,180,216,0.06)',fontFamily:'Outfit',letterSpacing:-1,lineHeight:1,display:'block'}}
+          />
+          <div style={{textAlign:'center',marginTop:8,fontSize:13,color:T.slate,fontWeight:500}}>{food.u}</div>
         </div>
         <div style={{background:'linear-gradient(135deg,rgba(0,180,216,0.12),rgba(0,180,216,0.04))',borderRadius:16,padding:16,marginBottom:18,border:'1.5px solid rgba(0,180,216,0.2)'}}>
-          <div style={{fontSize:10,color:T.teal,fontWeight:800,letterSpacing:1.5,marginBottom:12,fontFamily:'Outfit'}}>{t.for} {qty}{food.u}</div>
+          <div style={{fontSize:10,color:T.teal,fontWeight:800,letterSpacing:1.5,marginBottom:12,fontFamily:'Outfit'}}>{qty>0?`${t.for} ${qty}${food.u}`:t.quantity}</div>
           <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:9}}>
-            {[['🔵 '+t.hc,hc+'g',T.teal],['🔥 '+t.calories,cal+' kcal',T.coral],['🔴 '+t.fat,fat+'g',T.red],['🟢 '+t.protein,pro+'g',T.green],['🟣 '+t.fiber,fib+'g',T.purple],['⚡ '+t.fpu,fpu,'#E67E22']].map(([l,val,col])=>(
+            {[['🔵 '+t.hc,qty>0?hc+'g':'—',T.teal],['🔥 '+t.calories,qty>0?cal+' kcal':'—',T.coral],['🔴 '+t.fat,qty>0?fat+'g':'—',T.red],['🟢 '+t.protein,qty>0?pro+'g':'—',T.green],['🟣 '+t.fiber,qty>0?fib+'g':'—',T.purple],['⚡ '+t.fpu,qty>0?fpu:'—','#E67E22']].map(([l,val,col])=>(
               <div key={l} style={{display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 10px',background:'rgba(0,0,0,0.25)',borderRadius:10,border:'1px solid rgba(255,255,255,0.07)'}}>
                 <span style={{fontSize:12.5,color:T.slate}}>{l}</span>
                 <span style={{fontSize:16,fontWeight:800,color:col,fontFamily:'Outfit'}}>{val}</span>
